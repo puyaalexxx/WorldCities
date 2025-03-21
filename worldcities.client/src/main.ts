@@ -5,10 +5,12 @@ import { LocationStrategy, PathLocationStrategy } from '@angular/common';
 import { HomeComponent } from './app/home/home.component';
 import { provideRouter, Routes } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
+import { CitiesComponent } from './app/cities/cities.component';
 
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'cities', component: CitiesComponent },
 ];
 
 // Bootstrap the application
