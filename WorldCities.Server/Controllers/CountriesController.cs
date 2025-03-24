@@ -23,36 +23,38 @@ namespace WorldCities.Server.Controllers
 
         // GET: api/Countries
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<City>>> GetCities()
+        public async Task<ActionResult<ApiResult<Country>>> GetCountries(int pageIndex = 0, int pageSize = 10,
+            string? sortColumn = null, string? sortOrder = null,
+            string? filterColumn = null, string? filterQuery = null)
         {
-            return await _context.Cities.ToListAsync();
+            return await ApiResult<Country>.CreateAsync(_context.Countries.AsNoTracking(), pageIndex, pageSize, sortColumn, sortOrder, filterColumn, filterQuery);
         }
 
         // GET: api/Countries/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<City>> GetCity(int id)
+        public async Task<ActionResult<Country>> GetCountry(int id)
         {
-            var city = await _context.Cities.FindAsync(id);
+            var country = await _context.Countries.FindAsync(id);
 
-            if (city == null)
+            if (country == null)
             {
                 return NotFound();
             }
 
-            return city;
+            return country;
         }
 
         // PUT: api/Countries/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCity(int id, City city)
+        public async Task<IActionResult> PutCountry(int id, Country country)
         {
-            if (id != city.Id)
+            if (id != country.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(city).State = EntityState.Modified;
+            _context.Entry(country).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +62,7 @@ namespace WorldCities.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!CityExists(id))
+                if (!CountryExists(id))
                 {
                     return NotFound();
                 }
@@ -76,33 +78,33 @@ namespace WorldCities.Server.Controllers
         // POST: api/Countries
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<City>> PostCity(City city)
+        public async Task<ActionResult<Country>> PostCountry(Country country)
         {
-            _context.Cities.Add(city);
+            _context.Countries.Add(country);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetCity", new { id = city.Id }, city);
+            return CreatedAtAction("GetCountry", new { id = country.Id }, country);
         }
 
         // DELETE: api/Countries/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCity(int id)
+        public async Task<IActionResult> DeleteCountry(int id)
         {
-            var city = await _context.Cities.FindAsync(id);
-            if (city == null)
+            var country = await _context.Countries.FindAsync(id);
+            if (country == null)
             {
                 return NotFound();
             }
 
-            _context.Cities.Remove(city);
+            _context.Countries.Remove(country);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool CityExists(int id)
+        private bool CountryExists(int id)
         {
-            return _context.Cities.Any(e => e.Id == id);
+            return _context.Countries.Any(e => e.Id == id);
         }
     }
 }

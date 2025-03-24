@@ -6,11 +6,13 @@ import { HomeComponent } from './app/home/home.component';
 import { provideRouter, Routes } from '@angular/router';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { CitiesComponent } from './app/cities/cities.component';
+import { CountriesComponent } from './app/countries/countries.component';
 
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'cities', component: CitiesComponent },
+  { path: 'countries', component: CountriesComponent },
 ];
 
 // Bootstrap the application
