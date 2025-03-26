@@ -1,0 +1,60 @@
+<div class="city-edit">
+
+    <h1>{{title}}</h1>
+
+    <p *ngIf="id && !city"><em>Loading...</em></p>
+
+    <div [formGroup]="form" (ngSubmit)="onSubmit()">
+
+        <p>
+            <mat-error *ngIf="form.invalid && form.hasError('isDupeCity')">
+                <strong>ERROR</strong>:
+                A city with the same <i>name</i>, <i>lat</i>,
+                <i>lon</i> and <i>country</i> already exists.
+            </mat-error>
+        </p>
+
+        <!-- Name -->
+        <mat-form-field>
+            <mat-label>Name:</mat-label>
+            <input matInput formControlName="name" required placeholder="Type a name">
+        </mat-form-field>
+        <mat-error *ngIf="form.controls['name'].errors?.['required']">
+            Name is required.
+        </mat-error>
+
+        <!-- Lat -->
+        <mat-form-field>
+            <mat-label>Latitude:</mat-label>
+            <input matInput formControlName="lat" required  placeholder="Insert latitude">
+        </mat-form-field>
+        <mat-error *ngIf="form.controls['lat'].errors?.['required']">
+            Latitude is required.
+        </mat-error>
+
+        <!-- Lon -->
+        <mat-form-field>
+            <mat-label>Longitude:</mat-label>
+            <input matInput formControlName="lon" required placeholder="Insert longitude">
+        </mat-form-field>
+        <mat-error *ngIf="form.controls['lon'].errors?.['required']">
+            Longitude is required.
+        </mat-error>
+
+        <!-- Country -->
+        <mat-form-field *ngIf="countries">
+            <mat-label>Select a Country...</mat-label>
+            <mat-select id="countryId" formControlName="countryId">
+                <mat-option *ngFor="let country of countries"[value]="country.id">{{country.name}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+        <mat-error *ngIf="form.controls['countryId'].errors?.['required']">
+            Please select a Country.
+        </mat-error>
+
+        <div>
+            <button mat-flat-button color="primary" type="submit" (click)="onSubmit()" [disabled]="!form.valid">{{this.id ? "Save" : "Create"}}</button>
+            <button mat-flat-button color="secondary" [routerLink]="['/cities']">Cancel</button>
+        </div>
+    </div>
+</div>

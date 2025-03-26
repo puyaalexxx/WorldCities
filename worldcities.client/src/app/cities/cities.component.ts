@@ -7,11 +7,13 @@ import { AngularMaterialSharedModule } from '../modules/angular-material-shared.
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
+import { RouterModule } from '@angular/router';
+import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 
 @Component({
   selector: 'app-cities',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, AngularMaterialSharedModule],
+  imports: [CommonModule, HttpClientModule, AngularMaterialSharedModule, RouterModule],
   templateUrl: './cities.component.html',
   styleUrl: './cities.component.scss'
 })
@@ -30,11 +32,26 @@ export class CitiesComponent implements OnInit {
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
+    filterTextChanged: Subject<string> = new Subject<string>();
+
     constructor(private http: HttpClient) {
     }
 
     ngOnInit(){
         this.loadData();
+    }
+
+    //debouncing
+    onFilterTextChanged(filterText: string){
+        if(!this.filterTextChanged.observed){
+            this.filterTextChanged
+            .pipe(debounceTime(1000), distinctUntilChanged())
+            .subscribe(query => {
+                this.loadData(query);
+            });
+        }
+
+        this.filterTextChanged.next(filterText);
     }
 
     loadData(query?: string){

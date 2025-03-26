@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldCities.Server.Data;
 using WorldCities.Server.Data.Models;
-using System.Linq.Dynamic.Core;
 
 namespace WorldCities.Server.Controllers;
 
@@ -19,12 +18,13 @@ public class CitiesController : ControllerBase
 
     // GET: api/Cities
     [HttpGet]
-    public async Task<ActionResult<ApiResult<City>>> GetCities(int pageIndex = 0, int pageSize = 10, 
+    public async Task<ActionResult<ApiResult<City>>> GetCities(int pageIndex = 0, int pageSize = 10,
         string? sortColumn = null, string? sortOrder = null, string? filterColumn = null, string? filterQuery = null)
     {
         var cities = _context.Cities;
 
-        return await ApiResult<City>.CreateAsync(cities.AsNoTracking(), pageIndex, pageSize, sortColumn, sortOrder, filterColumn, filterQuery);
+        return await ApiResult<City>.CreateAsync(cities.AsNoTracking(), pageIndex, pageSize, sortColumn, sortOrder,
+            filterColumn, filterQuery);
     }
 
     // GET: api/Cities/5
@@ -88,5 +88,18 @@ public class CitiesController : ControllerBase
     private bool CityExists(int id)
     {
         return _context.Cities.Any(e => e.Id == id);
+    }
+
+    [HttpPost]
+    [Route("IsDupeCity")]
+    public bool IsDupeCity(City city)
+    {
+        return _context.Cities.AsNoTracking().Any(
+            e => e.Name == city.Name
+                 && e.Lat == city.Lat
+                 && e.Lon == city.Lon
+                 && e.CountryId == city.CountryId
+                 && e.Id != city.Id
+        );
     }
 }

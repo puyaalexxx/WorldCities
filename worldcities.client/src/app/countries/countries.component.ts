@@ -7,12 +7,13 @@ import { MatSort } from '@angular/material/sort';
 import { Country } from './country';
 import { AngularMaterialSharedModule } from '../modules/angular-material-shared.module';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
 
 
 @Component({
     selector: 'app-countries',
     standalone: true,
-    imports: [AngularMaterialSharedModule, CommonModule, HttpClientModule,],
+    imports: [AngularMaterialSharedModule, CommonModule, HttpClientModule, RouterModule],
     templateUrl: './countries.component.html',
     styleUrl: './countries.component.scss'
 })
