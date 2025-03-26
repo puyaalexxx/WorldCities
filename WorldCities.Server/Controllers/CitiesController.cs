@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldCities.Server.Data;
+using WorldCities.Server.Data.DTOs;
 using WorldCities.Server.Data.Models;
 
 namespace WorldCities.Server.Controllers;
@@ -18,12 +19,22 @@ public class CitiesController : ControllerBase
 
     // GET: api/Cities
     [HttpGet]
-    public async Task<ActionResult<ApiResult<City>>> GetCities(int pageIndex = 0, int pageSize = 10,
+    public async Task<ActionResult<ApiResult<CityDTO>>> GetCities(int pageIndex = 0, int pageSize = 10,
         string? sortColumn = null, string? sortOrder = null, string? filterColumn = null, string? filterQuery = null)
     {
         var cities = _context.Cities;
 
-        return await ApiResult<City>.CreateAsync(cities.AsNoTracking(), pageIndex, pageSize, sortColumn, sortOrder,
+        return await ApiResult<CityDTO>.CreateAsync(cities.AsNoTracking().Select(c => new CityDTO()
+            {
+                Id = c.Id,
+                Name = c.Name,
+                Lat = c.Lat,
+                Lon = c.Lon,
+                CountryId = c.CountryId,
+                CountryName = c.Country!.Name,
+            }), 
+            pageIndex, pageSize, 
+            sortColumn, sortOrder,
             filterColumn, filterQuery);
     }
 

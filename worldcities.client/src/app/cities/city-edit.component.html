@@ -19,8 +19,8 @@
             <mat-label>Name:</mat-label>
             <input matInput formControlName="name" required placeholder="Type a name">
         </mat-form-field>
-        <mat-error *ngIf="form.controls['name'].errors?.['required']">
-            Name is required.
+        <mat-error *ngFor="let error of getErrors(form.get('name')!, 'Name')">
+            {{error}}
         </mat-error>
 
         <!-- Lat -->
@@ -28,8 +28,8 @@
             <mat-label>Latitude:</mat-label>
             <input matInput formControlName="lat" required  placeholder="Insert latitude">
         </mat-form-field>
-        <mat-error *ngIf="form.controls['lat'].errors?.['required']">
-            Latitude is required.
+        <mat-error *ngFor="let error of getErrors(form.get('lat')!, 'Latitude', { 'pattern' : 'requires a positive or negative number with 0-4 decimal values' })">
+            {{error}}
         </mat-error>
 
         <!-- Lon -->
@@ -37,8 +37,8 @@
             <mat-label>Longitude:</mat-label>
             <input matInput formControlName="lon" required placeholder="Insert longitude">
         </mat-form-field>
-        <mat-error *ngIf="form.controls['lon'].errors?.['required']">
-            Longitude is required.
+        <mat-error *ngFor="let error of getErrors(form.get('lon')!, 'Longitude',{ 'pattern' : 'requires a positive or negative number with 0-4 decimal values' })">
+            {{error}}
         </mat-error>
 
         <!-- Country -->
@@ -48,8 +48,8 @@
                 <mat-option *ngFor="let country of countries"[value]="country.id">{{country.name}}</mat-option>
             </mat-select>
         </mat-form-field>
-        <mat-error *ngIf="form.controls['countryId'].errors?.['required']">
-            Please select a Country.
+        <mat-error *ngFor="let error of getErrors(form.get('countryId')!, 'Country')">
+            {{error}}
         </mat-error>
 
         <div>

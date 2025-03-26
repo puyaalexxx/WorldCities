@@ -9,18 +9,19 @@ import { environment } from '../../environments/environment';
 import { AngularMaterialSharedModule } from '../modules/angular-material-shared.module';
 import { Country } from '../countries/country';
 import { map, Observable } from 'rxjs';
+import { BaseFormComponent } from '../base-form.component';
+import { CityService } from './city.service';
 
 @Component({
-  selector: 'app-city-edit',
-  standalone: true,
-  imports: [ReactiveFormsModule,CommonModule, HttpClientModule, AngularMaterialSharedModule, RouterModule],
-  templateUrl: './city-edit.component.html',
-  styleUrl: './city-edit.component.scss'
+    selector: 'app-city-edit',
+    standalone: true,
+    imports: [ReactiveFormsModule,CommonModule, HttpClientModule, AngularMaterialSharedModule, RouterModule],
+    providers: [CityService],
+    templateUrl: './city-edit.component.html',
+    styleUrl: './city-edit.component.scss'
 })
-export class CityEditComponent implements OnInit {
+export class CityEditComponent extends BaseFormComponent implements OnInit {
     title?: string;
-
-    form!: FormGroup;
 
     city?: City;
 
@@ -31,14 +32,24 @@ export class CityEditComponent implements OnInit {
     //dropdown with countries
     countries?: Country[];
 
-    constructor(private activatedRoute: ActivatedRoute, private router: Router, private http: HttpClient) {
+    constructor(
+        private activatedRoute: ActivatedRoute, 
+        private router: Router, 
+        private cityService: CityService) {
+        super();
     }
 
     ngOnInit(): void {
         this.form = new FormGroup({
             name: new FormControl('', Validators.required),
-            lat: new FormControl('', Validators.required),
-            lon: new FormControl('', Validators.required),
+            lat: new FormControl('', [
+                Validators.required,
+                Validators.pattern(/^[-]?[0-9]+(\.[0-9]{1,4})?$/)
+            ]),
+            lon: new FormControl('', [
+                Validators.required,
+                Validators.pattern(/^[-]?[0-9]+(\.[0-9]{1,4})?$/)
+            ]),
             countryId: new FormControl('', Validators.required)
         }, null, this.isDupeCity());
 
@@ -53,38 +64,31 @@ export class CityEditComponent implements OnInit {
         var idParam = this.activatedRoute.snapshot.paramMap.get('id');
         this.id = idParam ? +idParam : 0;
 
+        // EDIT MODE
         if (this.id) {
-            // EDIT MODE
             // fetch the city from the server
-            var url = environment.baseUrl + 'api/Cities/' + this.id;
+            this.cityService.get(this.id)
+            .subscribe({
+                next: (result) => {
+                    this.city = result;
+                    this.title = "Edit - " + this.city.name;
 
-            this.http.get<City>(url).subscribe({
-            next: (result) => {
-                this.city = result;
-                this.title = "Edit - " + this.city.name;
-
-                // update the form with the city value
-                this.form.patchValue(this.city);
-            },
-            error: (error) => console.error(error)
+                    // update the form with the city value
+                    this.form.patchValue(this.city);
+                },
+                error: (error) => console.error(error)
             });
         }
+        // ADD NEW MODE
         else {
-            // ADD NEW MODE
             this.title = "Create a new City";
         }
     }
 
     loadCountries() {
         // fetch all the countries from the server
-        var url = environment.baseUrl + 'api/Countries';
-
-        var params = new HttpParams()
-            .set("pageIndex", "0")
-            .set("pageSize", "9999")
-            .set("sortColumn", "name");
-
-        this.http.get<any>(url, { params }).subscribe({
+        this.cityService.getCountries(0,9999,"name","asc",null, null)
+        .subscribe({
             next: (result) => {
                 this.countries = result.data;
             },
@@ -103,34 +107,29 @@ export class CityEditComponent implements OnInit {
 
             // EDIT mode
             if (this.id) { 
-                var url = environment.baseUrl + 'api/Cities/' + city.id;
-
-                this.http
-                  .put<City>(url, city)
-                  .subscribe({
+                this.cityService.put(city)
+                .subscribe({
                     next: (result) => {
-                      console.log("City " + city!.id + " has been updated.");
+                        console.log("City " + city!.id + " has been updated.");
 
-                      // go back to cities view
-                      this.router.navigate(['/cities']);
+                        // go back to cities view
+                        this.router.navigate(['/cities']);
                     },
                     error: (error) => console.error(error)
-                  });
+                });
             }
+            // ADD NEW mode
             else {
-                // ADD NEW mode
-                var url = environment.baseUrl + 'api/Cities';
-
-                this.http.post<City>(url, city)
-                  .subscribe({
+                this.cityService.post(city)
+                .subscribe({
                     next: (result) => {
-                      console.log("City " + result.id + " has been created.");
+                        console.log("City " + result.id + " has been created.");
 
-                      // go back to cities view
-                      this.router.navigate(['/cities']);
+                        // go back to cities view
+                        this.router.navigate(['/cities']);
                     },
                     error: (error) => console.error(error)
-                  });
+                });
             }
         }
     }
@@ -148,7 +147,7 @@ export class CityEditComponent implements OnInit {
 
             var url = environment.baseUrl + 'api/Cities/IsDupeCity';
 
-            return this.http.post<boolean>(url, city).pipe(map(result => {
+            return this.cityService.isDupeCity(city).pipe(map(result => {
                 return (result ? { isDupeCity: true } : null);
             }));
         };

@@ -1,6 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { HttpClient, HttpClientModule, HttpParams } from '@angular/common/http';
-import { environment } from './../../environments/environment';
+import {  HttpClientModule } from '@angular/common/http';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, PageEvent } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
@@ -8,17 +7,19 @@ import { Country } from './country';
 import { AngularMaterialSharedModule } from '../modules/angular-material-shared.module';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { CountryService } from './country.service';
 
 
 @Component({
     selector: 'app-countries',
     standalone: true,
     imports: [AngularMaterialSharedModule, CommonModule, HttpClientModule, RouterModule],
+    providers: [CountryService],
     templateUrl: './countries.component.html',
     styleUrl: './countries.component.scss'
 })
 export class CountriesComponent implements OnInit {
-    public displayedColumns: string[] = ['id', 'name', 'iso2', 'iso3'];
+    public displayedColumns: string[] = ['id', 'name', 'iso2', 'iso3', 'totCities'];
     public countries!: MatTableDataSource<Country>;
 
     defaultPageIndex: number = 0;
@@ -33,7 +34,7 @@ export class CountriesComponent implements OnInit {
     @ViewChild(MatPaginator) paginator!: MatPaginator;
     @ViewChild(MatSort) sort!: MatSort;
 
-    constructor(private http: HttpClient) {
+    constructor(private countryService: CountryService) {
     }
 
     ngOnInit() {
@@ -50,31 +51,23 @@ export class CountriesComponent implements OnInit {
     }
 
     getData(event: PageEvent) {
-        var url = environment.baseUrl + 'api/Countries';
-        
-        var params = new HttpParams()
-        .set("pageIndex", event.pageIndex.toString())
-        .set("pageSize", event.pageSize.toString())
-        .set("sortColumn", (this.sort)
-            ? this.sort.active
-            : this.defaultSortColumn)
-        .set("sortOrder", (this.sort)
-            ? this.sort.direction
-            : this.defaultSortOrder);
+        var sortColumn = (this.sort) ? this.sort.active : this.defaultSortColumn;
 
-        if (this.filterQuery) {
-            params = params
-            .set("filterColumn", this.defaultFilterColumn)
-            .set("filterQuery", this.filterQuery);
-        } 
+        var sortOrder = (this.sort) ? this.sort.direction : this.defaultSortOrder;
 
-        this.http.get<any>(url, { params })
+        var filterColumn = (this.filterQuery) ? this.defaultFilterColumn : null;
+
+        var filterQuery = (this.filterQuery) ? this.filterQuery: null;
+
+        this.countryService.getData(
+            event.pageIndex, event.pageSize,
+            sortColumn, sortOrder, filterColumn, filterQuery)
         .subscribe({
             next: (result) => {
-            this.paginator.length = result.totalCount;
-            this.paginator.pageIndex = result.pageIndex;
-            this.paginator.pageSize = result.pageSize;
-            this.countries = new MatTableDataSource<Country>(result.data);
+                this.paginator.length = result.totalCount;
+                this.paginator.pageIndex = result.pageIndex;
+                this.paginator.pageSize = result.pageSize;
+                this.countries = new MatTableDataSource<Country>(result.data);
             },
             error: (error) => console.error(error)
         });
