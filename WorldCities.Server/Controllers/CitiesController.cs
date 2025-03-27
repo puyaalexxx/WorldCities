@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WorldCities.Server.Data;
@@ -52,6 +53,7 @@ public class CitiesController : ControllerBase
     // PUT: api/Cities/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut("{id}")]
+    [Authorize(Roles = "RegisteredUser")]
     public async Task<IActionResult> PutCity(int id, City city)
     {
         if (id != city.Id) return BadRequest();
@@ -75,6 +77,7 @@ public class CitiesController : ControllerBase
     // POST: api/Cities
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
+    [Authorize(Roles = "RegisteredUser")]
     public async Task<ActionResult<City>> PostCity(City city)
     {
         _context.Cities.Add(city);
@@ -85,6 +88,7 @@ public class CitiesController : ControllerBase
 
     // DELETE: api/Cities/5
     [HttpDelete("{id}")]
+    [Authorize(Roles = "Administrator")]
     public async Task<IActionResult> DeleteCity(int id)
     {
         var city = await _context.Cities.FindAsync(id);
