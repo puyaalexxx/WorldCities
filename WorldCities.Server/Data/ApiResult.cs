@@ -1,6 +1,6 @@
+using System.Linq.Dynamic.Core;
 using System.Reflection;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Dynamic.Core;
 
 namespace WorldCities.Server.Data;
 
@@ -55,21 +55,26 @@ public class ApiResult<T>
     ///     TRUE if the current page has a next page, FALSE otherwise. ///
     /// </summary>
     public bool HasNextPage => PageIndex + 1 < TotalPages;
-    
+
     /// <summary>
-    /// Sorting Column name (or null if none set) /// </summary>
+    ///     Sorting Column name (or null if none set) ///
+    /// </summary>
     public string? SortColumn { get; set; }
-    
+
     /// <summary>
-    /// Sorting Order ("ASC", "DESC" or null if none set) /// </summary>
+    ///     Sorting Order ("ASC", "DESC" or null if none set) ///
+    /// </summary>
     public string? SortOrder { get; set; }
-    
+
     /// <summary>
-    /// Filter Column name (or null if none set) /// </summary>
+    ///     Filter Column name (or null if none set) ///
+    /// </summary>
     public string? FilterColumn { get; set; }
+
     /// <summary>
-    /// Filter Query string
-    /// (to be used within the given FilterColumn) /// </summary>
+    ///     Filter Query string
+    ///     (to be used within the given FilterColumn) ///
+    /// </summary>
     public string? FilterQuery { get; set; }
 
     /// <summary>
@@ -85,46 +90,49 @@ public class ApiResult<T>
     /// <returns>
     ///     A object containing the paged result and all the relevant paging navigation info.
     /// </returns>
-    public static async Task<ApiResult<T>> CreateAsync(IQueryable<T> source, 
-        int pageIndex, int pageSize, 
-        string? sortColumn = null, string? sortOrder = null, 
+    public static async Task<ApiResult<T>> CreateAsync(IQueryable<T> source,
+        int pageIndex, int pageSize,
+        string? sortColumn = null, string? sortOrder = null,
         string? filterColumn = null, string? filterQuery = null)
     {
         if (!string.IsNullOrEmpty(filterColumn) && !string.IsNullOrEmpty(filterQuery) && IsValidProperty(filterColumn))
-        {
             source = source.Where(string.Format("{0}.StartsWith(@0)", filterColumn), filterQuery);
-        }
-        
+
         var count = await source.CountAsync();
 
         if (!string.IsNullOrEmpty(sortColumn) && IsValidProperty(sortColumn))
         {
-            sortOrder = !string.IsNullOrEmpty(sortOrder) && sortOrder.ToUpper() == "ASC" ? "ASC": "DESC";
-            
+            sortOrder = !string.IsNullOrEmpty(sortOrder) && sortOrder.ToUpper() == "ASC" ? "ASC" : "DESC";
+
             source = source.OrderBy(string.Format("{0} {1}", sortColumn, sortOrder));
         }
-        
+
         source = source
             .Skip(pageIndex * pageSize)
             .Take(pageSize);
-        
+
+        /*#if DEBUG
+            //retrieve the sql query (debugging purposes)
+            var sql = source.ToParametrizedSql();
+        #endif*/
+
         var data = await source.ToListAsync();
-        
+
         return new ApiResult<T>(data, count, pageIndex, pageSize, sortColumn, sortOrder, filterColumn, filterQuery);
     }
-    
+
     /// <summary>
-    /// Checks if the given property name exists
-    /// to protect against SQL injection attacks
+    ///     Checks if the given property name exists
+    ///     to protect against SQL injection attacks
     /// </summary>
     public static bool IsValidProperty(string propertyName, bool throwExceptionIfNotFound = true)
     {
-        var prop = typeof(T).GetProperty(propertyName, BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-        
+        var prop = typeof(T).GetProperty(propertyName,
+            BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
         if (prop == null && throwExceptionIfNotFound)
             throw new NotSupportedException(string.Format($"ERROR: Property '{propertyName}' does not exist."));
-        
+
         return prop != null;
     }
-
 }
