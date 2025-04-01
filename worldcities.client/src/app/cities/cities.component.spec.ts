@@ -58,7 +58,7 @@ describe('CitiesComponent', () => {
             ]
         }).compileComponents();
     });
-§§§
+
     beforeEach(() => {
         fixture = TestBed.createComponent(CitiesComponent);
         component = fixture.componentInstance;

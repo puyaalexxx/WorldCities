@@ -6,6 +6,8 @@ using WorldCities.Server.Data.Models;
 
 namespace WorldCities.Server.Controllers;
 
+[ApiController]
+[Route("api/[controller]")]
 public class AccountController : Controller
 {
     private readonly ApplicationDbContext _context;

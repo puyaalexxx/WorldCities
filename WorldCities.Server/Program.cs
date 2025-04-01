@@ -7,6 +7,7 @@ using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
 using WorldCities.Server.Data;
+using WorldCities.Server.Data.GraphQL;
 using WorldCities.Server.Data.Models;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,6 +55,13 @@ builder.Services.AddAuthentication(opt =>
     };
 });
 
+builder.Services.AddGraphQLServer()
+    .AddAuthorization()
+    .AddQueryType<Query>()
+    .AddMutationType<Mutation>()
+    .AddFiltering()
+    .AddSorting();
+
 builder.Services.AddScoped<JwtHandler>();
 
 builder.Host.UseSerilog((ctx, lc) => lc
@@ -90,6 +98,8 @@ if (app.Environment.IsDevelopment())
 else
 {
     app.UseExceptionHandler("/error");
+    app.MapGet("/Error", () => Results.Problem());
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -97,6 +107,7 @@ app.MapControllers();
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.MapGraphQL("/api/graphql");
 app.UseSerilogRequestLogging();
 
 app.Run();
