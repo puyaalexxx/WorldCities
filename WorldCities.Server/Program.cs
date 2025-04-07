@@ -78,6 +78,18 @@ builder.Host.UseSerilog((ctx, lc) => lc
 
 var app = builder.Build();
 
+app.UseSwagger();
+app.UseSwaggerUI( /*options =>
+{
+    var descriptions = app.DescribeApiVersions();
+    foreach (var description in descriptions)
+        options.SwaggerEndpoint($"/swagger/{description.GroupName}/swagger.json",
+            $"MyBGList {description.GroupName.ToUpperInvariant()}");
+
+    options.RoutePrefix =
+        string.Empty; // Swagger UI at the root (remove swagger from https://localhost:7074/swagger/index.html)
+}*/);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

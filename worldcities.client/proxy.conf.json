@@ -1,6 +1,6 @@
 {
     "/api": {
-      "target": "https://localhost:7001",   
+      "target": "https://worldcities-api-ffeaecgeafb4bgfk.germanywestcentral-01.azurewebsites.net",   
       "secure": false,                     
       "changeOrigin": true,                
       "logLevel": "debug" 
